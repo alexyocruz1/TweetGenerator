@@ -107,22 +107,47 @@ async function generateImage(match: Match, theme: 'light' | 'dark'): Promise<str
   const div = document.createElement('div')
   div.style.width = '1080px'
   div.style.height = '1920px'
-  div.style.background = theme === 'light' ? 'white' : 'black'
-  div.style.color = theme === 'light' ? 'black' : 'white'
+  div.style.background = theme === 'light' 
+    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+    : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)'
+  div.style.color = 'white'
   div.style.display = 'flex'
   div.style.flexDirection = 'column'
   div.style.justifyContent = 'center'
   div.style.alignItems = 'center'
-  div.style.padding = '40px'
+  div.style.padding = '60px'
   div.style.fontFamily = 'Arial, sans-serif'
   div.style.textAlign = 'center'
+  div.style.position = 'relative'
+  div.style.overflow = 'hidden'
+
+  // Add some decorative elements
   div.innerHTML = `
-    <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 20px;">${match.home} vs ${match.away}</h1>
-    <p style="font-size: 36px; margin-bottom: 20px;">${match.competitionEmoji} ${match.competitionName}</p>
-    <p style="font-size: 32px; line-height: 1.4;">${match.description}</p>
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);"></div>
+    
+    <div style="position: relative; z-index: 1; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 40px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 800px; width: 100%;">
+      <div style="font-size: 24px; margin-bottom: 20px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
+      
+      <h1 style="font-size: 56px; font-weight: bold; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
+        ${toTitleCase(match.home)}<br><span style="font-size: 36px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
+      </h1>
+      
+      <div style="font-size: 32px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <span>${match.competitionEmoji}</span>
+        <span>${toTitleCase(match.competitionName)}</span>
+      </div>
+      
+      <div style="font-size: 26px; line-height: 1.4; margin-bottom: 30px; font-style: italic;">
+        "${toTitleCase(match.description)}"
+      </div>
+      
+      <div style="font-size: 20px; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px;">
+        #ADNFutbolero #Predicciones
+      </div>
+    </div>
   `
   document.body.appendChild(div)
-  const canvas = await html2canvas(div, { width: 1080, height: 1920 })
+  const canvas = await html2canvas(div, { width: 1080, height: 1920, backgroundColor: null })
   document.body.removeChild(div)
   return canvas.toDataURL('image/png')
 }
@@ -140,6 +165,7 @@ export default function Home() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [tweets, setTweets] = useState<string[]>([])
   const [images, setImages] = useState<string[]>([])
+  const [copiedTweetIndex, setCopiedTweetIndex] = useState<number | null>(null)
 
   const flagSelectOptions = useMemo(() => flagOptions.map(f => ({ value: `${f.emoji} ${f.country}`, label: `${f.emoji} ${f.country}` })), [])
 
@@ -355,10 +381,14 @@ export default function Home() {
                     </div>
                     <div className="flex gap-3 mb-4">
                       <button
-                        onClick={() => navigator.clipboard.writeText(tweet)}
+                        onClick={() => {
+                          navigator.clipboard.writeText(tweet)
+                          setCopiedTweetIndex(i)
+                          setTimeout(() => setCopiedTweetIndex(null), 2000)
+                        }}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-md transform hover:scale-105 transition-all duration-200 flex items-center gap-1"
                       >
-                        📋 Copiar Tweet
+                        {copiedTweetIndex === i ? '✅ Copiado!' : '📋 Copiar Tweet'}
                       </button>
                     </div>
                     {images[i] && (
