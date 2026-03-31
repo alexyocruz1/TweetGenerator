@@ -197,10 +197,58 @@ async function generateImage(match: Match, theme: 'light' | 'dark', template: 's
 }
 
 function downloadImage(dataUrl: string, filename: string) {
-  const link = document.createElement('a')
-  link.href = dataUrl
-  link.download = filename
-  link.click()
+  // Convert data URL to blob
+  const arr = dataUrl.split(',')
+  const mime = arr[0].match(/:(.*?);/)![1]
+  const bstr = atob(arr[1])
+  let n = bstr.length
+  const u8arr = new Uint8Array(n)
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n)
+  }
+  const blob = new Blob([u8arr], { type: mime })
+
+  // Check if Web Share API is available (mobile browsers)
+  if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: mime })] })) {
+    const file = new File([blob], filename, { type: mime })
+    navigator.share({
+      files: [file],
+      title: 'Imagen de predicción ADN Futbolero'
+    }).catch(err => {
+      console.log('Error sharing:', err)
+      fallbackDownload(blob, filename)
+    })
+  } else {
+    fallbackDownload(blob, filename)
+  }
+}
+
+function fallbackDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+
+  // Check if it's iOS Safari (doesn't support download attribute well)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
+  if (isIOS && isSafari) {
+    // For iOS Safari, open in new tab so user can long-press to save
+    const newTab = window.open(url, '_blank')
+    if (!newTab) {
+      // If popup blocked, show instructions
+      alert('Para guardar la imagen en iOS: toca y mantén presionada la imagen, luego selecciona "Guardar imagen"')
+    }
+  } else {
+    // Standard download for other browsers
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  // Clean up the object URL
+  setTimeout(() => URL.revokeObjectURL(url), 100)
 }
 
 export default function Home() {
