@@ -235,10 +235,11 @@ function downloadImage(dataUrl: string, filename: string) {
     u8arr[n] = bstr.charCodeAt(n)
   }
   const blob = new Blob([u8arr], { type: mime })
+  const file = new File([blob], filename, { type: mime })
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
 
-  // Check if Web Share API is available and can share files
-  if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: mime })] })) {
-    const file = new File([blob], filename, { type: mime })
+  // Use Web Share API only on mobile devices; desktop should download directly.
+  if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     navigator.share({
       files: [file],
       title: 'Imagen de predicción ADN Futbolero'
