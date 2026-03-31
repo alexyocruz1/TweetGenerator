@@ -208,7 +208,7 @@ function downloadImage(dataUrl: string, filename: string) {
   }
   const blob = new Blob([u8arr], { type: mime })
 
-  // Check if Web Share API is available (mobile browsers)
+  // Check if Web Share API is available and can share files
   if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: mime })] })) {
     const file = new File([blob], filename, { type: mime })
     navigator.share({
@@ -216,29 +216,88 @@ function downloadImage(dataUrl: string, filename: string) {
       title: 'Imagen de predicción ADN Futbolero'
     }).catch(err => {
       console.log('Error sharing:', err)
-      fallbackDownload(blob, filename)
+      mobileFallback(blob, filename)
     })
   } else {
-    fallbackDownload(blob, filename)
+    mobileFallback(blob, filename)
   }
 }
 
-function fallbackDownload(blob: Blob, filename: string) {
+function mobileFallback(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
 
-  // Check if it's iOS Safari (doesn't support download attribute well)
+  // Check if it's iOS Safari
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 
   if (isIOS && isSafari) {
-    // For iOS Safari, open in new tab so user can long-press to save
-    const newTab = window.open(url, '_blank')
-    if (!newTab) {
+    // For iOS Safari, create a temporary page with the image and instructions
+    const imageWindow = window.open('', '_blank')
+    if (imageWindow) {
+      imageWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Guardar Imagen - ADN Futbolero</title>
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: #f5f5f5;
+                text-align: center;
+              }
+              .instructions {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+              }
+              .steps {
+                text-align: left;
+                max-width: 300px;
+                margin: 0 auto;
+              }
+              .steps ol {
+                padding-left: 20px;
+              }
+              .steps li {
+                margin-bottom: 10px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="instructions">
+              <h2>💾 Guardar Imagen</h2>
+              <p><strong>Toca y mantén presionada la imagen abajo, luego selecciona "Guardar imagen"</strong></p>
+              <div class="steps">
+                <ol>
+                  <li>Toca la imagen con un dedo</li>
+                  <li>Mantén presionado hasta que aparezca el menú</li>
+                  <li>Selecciona "Guardar imagen"</li>
+                  <li>¡Listo! La imagen se guardará en tu galería</li>
+                </ol>
+              </div>
+            </div>
+            <img src="${url}" alt="Imagen de predicción ADN Futbolero" />
+          </body>
+        </html>
+      `)
+      imageWindow.document.close()
+    } else {
       // If popup blocked, show instructions
-      alert('Para guardar la imagen en iOS: toca y mantén presionada la imagen, luego selecciona "Guardar imagen"')
+      alert('Para guardar la imagen: activa popups para este sitio, o copia la imagen manualmente.')
     }
   } else {
-    // Standard download for other browsers
+    // For Android and other mobile browsers, try standard download
     const link = document.createElement('a')
     link.href = url
     link.download = filename
@@ -247,8 +306,8 @@ function fallbackDownload(blob: Blob, filename: string) {
     document.body.removeChild(link)
   }
 
-  // Clean up the object URL
-  setTimeout(() => URL.revokeObjectURL(url), 100)
+  // Clean up the object URL after a delay
+  setTimeout(() => URL.revokeObjectURL(url), 60000) // Keep for 1 minute in case user needs it
 }
 
 export default function Home() {
