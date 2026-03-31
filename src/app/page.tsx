@@ -104,6 +104,34 @@ ${match.competitionEmoji} ${toTitleCase(match.home)} vs ${toTitleCase(match.away
 ${homeHashtag} ${awayHashtag}`
 }
 
+type ResultsTweetTemplate = {
+  title: string
+  matchStatus: string
+  dayLabel: string
+  daySuffix: string
+  recapSuffix: string
+  hashtag: string
+}
+
+function generateResultsTweet(matches: Match[], template: ResultsTweetTemplate): string {
+  const total = matches.length
+  const matchesLines = matches.length > 0
+    ? matches
+      .map((match, index) => `${toTitleCase(match.home)} vs ${toTitleCase(match.away)} → ${index % 2 === 0 ? template.matchStatusWon : template.matchStatusLost}`)
+      .join('\n')
+    : 'Sin partidos cargados'
+
+  return `${template.title}
+
+${matchesLines}
+
+${template.dayLabel} ${total}/${total}${template.daySuffix}
+
+${total} ${total === 1 ? template.recapSuffix : template.recapSuffixPlural}
+
+${template.hashtag}`
+}
+
 async function generateImage(match: Match, theme: 'light' | 'dark', template: 'standard' | 'split' | 'minimal'): Promise<string> {
   const div = document.createElement('div')
   div.style.width = '1080px'
@@ -318,6 +346,16 @@ export default function Home() {
   const [images, setImages] = useState<string[]>([])
   const [copiedTweetIndex, setCopiedTweetIndex] = useState<number | null>(null)
   const [template, setTemplate] = useState<'standard' | 'split' | 'minimal'>('standard')
+  const [resultsTweetTemplate, setResultsTweetTemplate] = useState<ResultsTweetTemplate>({
+    title: '✅ RESULTADOS DEL DIA | ADN Futbolero',
+    matchStatusWon: '✅GANADA',
+    matchStatusLost: '❎PERDIDA',
+    dayLabel: '📊Día:',
+    daySuffix: '✅',
+    recapSuffix: 'victoria el dia de hoy 💸⚽️',
+    recapSuffixPlural: 'victorias el dia de hoy 💸⚽️',
+    hashtag: '#ADNFutbolero'
+  })
 
   const flagSelectOptions = useMemo(() => flagOptions.map(f => ({ value: `${f.emoji} ${f.country}`, label: `${f.emoji} ${f.country}` })), [])
 
@@ -344,7 +382,9 @@ export default function Home() {
   }
 
   const generate = async () => {
-    const newTweets = matches.map((m, i) => generateTweet(m, i + 1, matches.length))
+    const matchTweets = matches.map((m, i) => generateTweet(m, i + 1, matches.length))
+    const resultsTweet = generateResultsTweet(matches, resultsTweetTemplate)
+    const newTweets = [...matchTweets, resultsTweet]
     setTweets(newTweets)
     const newImages = await Promise.all(matches.map(m => generateImage(m, theme, template)))
     setImages(newImages)
@@ -558,7 +598,19 @@ export default function Home() {
                       <span className="text-2xl">🐦</span> Tweet {i + 1}
                     </h3>
                     <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500 mb-4">
-                      <pre className="whitespace-pre-wrap text-gray-700 font-mono text-sm leading-relaxed">{tweet}</pre>
+                      {i === tweets.length - 1 ? (
+                        <textarea
+                          value={tweet}
+                          onChange={(e) => {
+                            const updatedTweets = [...tweets]
+                            updatedTweets[i] = e.target.value
+                            setTweets(updatedTweets)
+                          }}
+                          className="w-full min-h-[280px] p-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors resize-y bg-white text-gray-700 font-mono text-sm leading-relaxed"
+                        />
+                      ) : (
+                        <pre className="whitespace-pre-wrap text-gray-700 font-mono text-sm leading-relaxed">{tweet}</pre>
+                      )}
                     </div>
                     <div className="flex gap-3 mb-4">
                       <button
