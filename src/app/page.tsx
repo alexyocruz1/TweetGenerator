@@ -128,62 +128,62 @@ async function generateImage(match: Match, theme: 'light' | 'dark', template: 's
     
     <div style="position: relative; z-index: 1; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 40px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 800px; width: 100%;">
       ${template === 'minimal' ? `
-        <div style="font-size: 20px; margin-bottom: 15px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
+        <div style="font-size: 28px; margin-bottom: 15px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
         
-        <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
-          ${toTitleCase(match.home)}<br><span style="font-size: 28px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
+        <h1 style="font-size: 64px; font-weight: bold; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
+          ${toTitleCase(match.home)}<br><span style="font-size: 40px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
         </h1>
         
-        <div style="font-size: 24px; line-height: 1.3; margin-bottom: 25px; font-style: italic;">
+        <div style="font-size: 32px; line-height: 1.3; margin-bottom: 25px; font-style: italic;">
           "${toTitleCase(match.description)}"
         </div>
         
-        <div style="font-size: 16px; opacity: 0.8;">
+        <div style="font-size: 22px; opacity: 0.8;">
           #ADNFutbolero
         </div>
       ` : `
-        <div style="font-size: 18px; margin-bottom: 15px; opacity: 0.9; background: rgba(255,215,0,0.2); padding: 8px 16px; border-radius: 20px; display: inline-block; border: 1px solid rgba(255,215,0,0.3);">🔥 PREDICCIÓN DEL DÍA 🔥</div>
+        <div style="font-size: 24px; margin-bottom: 15px; opacity: 0.9; background: rgba(255,215,0,0.2); padding: 8px 16px; border-radius: 20px; display: inline-block; border: 1px solid rgba(255,215,0,0.3);">🔥 PREDICCIÓN DEL DÍA 🔥</div>
         
-        <div style="font-size: 24px; margin-bottom: 20px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
+        <div style="font-size: 32px; margin-bottom: 20px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
         
         ${template === 'split' ? `
           <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 30px;">
             <div style="flex: 1; text-align: right; padding-right: 20px;">
-              <div style="font-size: 36px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">${toTitleCase(match.home)}</div>
+              <div style="font-size: 48px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">${toTitleCase(match.home)}</div>
             </div>
-            <div style="font-size: 48px; color: #ffd700; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin: 0 15px;">VS</div>
+            <div style="font-size: 64px; color: #ffd700; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin: 0 15px;">VS</div>
             <div style="flex: 1; text-align: left; padding-left: 20px;">
-              <div style="font-size: 36px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">${toTitleCase(match.away)}</div>
+              <div style="font-size: 48px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">${toTitleCase(match.away)}</div>
             </div>
           </div>
         ` : `
-          <h1 style="font-size: 56px; font-weight: bold; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
-            ${toTitleCase(match.home)}<br><span style="font-size: 36px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
+          <h1 style="font-size: 72px; font-weight: bold; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
+            ${toTitleCase(match.home)}<br><span style="font-size: 48px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
           </h1>
         `}
         
-        <div style="font-size: 32px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <div style="font-size: 44px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 10px;">
           <span>${match.competitionEmoji}</span>
           <span>${toTitleCase(match.competitionName)}</span>
         </div>
         
         ${match.confidence > 0 && (template === 'standard' || template === 'split') ? `
           <div style="margin-bottom: 30px;">
-            <div style="font-size: 20px; margin-bottom: 10px; opacity: 0.9;">Confianza:</div>
-            <div style="font-size: 28px;">${'⭐'.repeat(match.confidence)}${'☆'.repeat(5 - match.confidence)}</div>
+            <div style="font-size: 26px; margin-bottom: 10px; opacity: 0.9;">Confianza:</div>
+            <div style="font-size: 36px;">${'⭐'.repeat(match.confidence)}${'☆'.repeat(5 - match.confidence)}</div>
           </div>
         ` : ''}
         
-        <div style="font-size: 26px; line-height: 1.4; margin-bottom: 30px; font-style: italic;">
+        <div style="font-size: 36px; line-height: 1.4; margin-bottom: 30px; font-style: italic;">
           "${toTitleCase(match.description)}"
         </div>
         
-        <div style="font-size: 18px; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px; margin-bottom: 20px;">
+        <div style="font-size: 26px; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px; margin-bottom: 20px;">
           #ADNFutbolero #Predicciones
         </div>
         
         ${(template === 'standard' || template === 'split') ? `
-          <div style="font-size: 16px; opacity: 0.7; text-align: center;">
+          <div style="font-size: 20px; opacity: 0.7; text-align: center;">
             ¡Sigue @adn_futbolero_ en X para más predicciones! 💬
           </div>
         ` : ''}
