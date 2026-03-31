@@ -106,10 +106,12 @@ ${homeHashtag} ${awayHashtag}`
 
 type ResultsTweetTemplate = {
   title: string
-  matchStatus: string
+  matchStatusWon: string
+  matchStatusLost: string
   dayLabel: string
   daySuffix: string
   recapSuffix: string
+  recapSuffixPlural: string
   hashtag: string
 }
 
