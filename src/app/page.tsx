@@ -15,6 +15,7 @@ type Match = {
   bet: string
   odds: string
   description: string
+  confidence: number
 }
 
 type Competition = {
@@ -103,7 +104,7 @@ ${match.competitionEmoji} ${toTitleCase(match.home)} vs ${toTitleCase(match.away
 ${homeHashtag} ${awayHashtag}`
 }
 
-async function generateImage(match: Match, theme: 'light' | 'dark'): Promise<string> {
+async function generateImage(match: Match, theme: 'light' | 'dark', template: 'standard' | 'split' | 'minimal'): Promise<string> {
   const div = document.createElement('div')
   div.style.width = '1080px'
   div.style.height = '1920px'
@@ -126,24 +127,67 @@ async function generateImage(match: Match, theme: 'light' | 'dark'): Promise<str
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);"></div>
     
     <div style="position: relative; z-index: 1; background: rgba(0,0,0,0.3); border-radius: 20px; padding: 40px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 800px; width: 100%;">
-      <div style="font-size: 24px; margin-bottom: 20px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
-      
-      <h1 style="font-size: 56px; font-weight: bold; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
-        ${toTitleCase(match.home)}<br><span style="font-size: 36px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
-      </h1>
-      
-      <div style="font-size: 32px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <span>${match.competitionEmoji}</span>
-        <span>${toTitleCase(match.competitionName)}</span>
-      </div>
-      
-      <div style="font-size: 26px; line-height: 1.4; margin-bottom: 30px; font-style: italic;">
-        "${toTitleCase(match.description)}"
-      </div>
-      
-      <div style="font-size: 20px; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px;">
-        #ADNFutbolero #Predicciones
-      </div>
+      ${template === 'minimal' ? `
+        <div style="font-size: 20px; margin-bottom: 15px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
+        
+        <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 25px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
+          ${toTitleCase(match.home)}<br><span style="font-size: 28px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
+        </h1>
+        
+        <div style="font-size: 24px; line-height: 1.3; margin-bottom: 25px; font-style: italic;">
+          "${toTitleCase(match.description)}"
+        </div>
+        
+        <div style="font-size: 16px; opacity: 0.8;">
+          #ADNFutbolero
+        </div>
+      ` : `
+        <div style="font-size: 18px; margin-bottom: 15px; opacity: 0.9; background: rgba(255,215,0,0.2); padding: 8px 16px; border-radius: 20px; display: inline-block; border: 1px solid rgba(255,215,0,0.3);">🔥 PREDICCIÓN DEL DÍA 🔥</div>
+        
+        <div style="font-size: 24px; margin-bottom: 20px; opacity: 0.9;">⚽ ADN FUTBOLERO</div>
+        
+        ${template === 'split' ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 30px;">
+            <div style="flex: 1; text-align: right; padding-right: 20px;">
+              <div style="font-size: 36px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">${toTitleCase(match.home)}</div>
+            </div>
+            <div style="font-size: 48px; color: #ffd700; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin: 0 15px;">VS</div>
+            <div style="flex: 1; text-align: left; padding-left: 20px;">
+              <div style="font-size: 36px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">${toTitleCase(match.away)}</div>
+            </div>
+          </div>
+        ` : `
+          <h1 style="font-size: 56px; font-weight: bold; margin-bottom: 30px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1;">
+            ${toTitleCase(match.home)}<br><span style="font-size: 36px; color: #ffd700;">VS</span><br>${toTitleCase(match.away)}
+          </h1>
+        `}
+        
+        <div style="font-size: 32px; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+          <span>${match.competitionEmoji}</span>
+          <span>${toTitleCase(match.competitionName)}</span>
+        </div>
+        
+        ${match.confidence > 0 && template !== 'minimal' ? `
+          <div style="margin-bottom: 30px;">
+            <div style="font-size: 20px; margin-bottom: 10px; opacity: 0.9;">Confianza:</div>
+            <div style="font-size: 28px;">${'⭐'.repeat(match.confidence)}${'☆'.repeat(5 - match.confidence)}</div>
+          </div>
+        ` : ''}
+        
+        <div style="font-size: 26px; line-height: 1.4; margin-bottom: 30px; font-style: italic;">
+          "${toTitleCase(match.description)}"
+        </div>
+        
+        <div style="font-size: 18px; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 20px; margin-bottom: 20px;">
+          #ADNFutbolero #Predicciones
+        </div>
+        
+        ${template !== 'minimal' ? `
+          <div style="font-size: 16px; opacity: 0.7; text-align: center;">
+            ¡Sigue @adn_futbolero_ en X para más predicciones! 💬
+          </div>
+        ` : ''}
+      `}
     </div>
   `
   document.body.appendChild(div)
@@ -166,12 +210,13 @@ export default function Home() {
   const [tweets, setTweets] = useState<string[]>([])
   const [images, setImages] = useState<string[]>([])
   const [copiedTweetIndex, setCopiedTweetIndex] = useState<number | null>(null)
+  const [template, setTemplate] = useState<'standard' | 'split' | 'minimal'>('standard')
 
   const flagSelectOptions = useMemo(() => flagOptions.map(f => ({ value: `${f.emoji} ${f.country}`, label: `${f.emoji} ${f.country}` })), [])
 
   const addMatch = () => {
     const defaultFlag = flagOptions[0];
-    setMatches([...matches, { id: nextId, home: '', away: '', competitionEmoji: defaultFlag.emoji, competitionName: '', flagInputValue: `${defaultFlag.emoji} ${defaultFlag.country}`, selectedFlag: flagSelectOptions.find(o => o.value === `${defaultFlag.emoji} ${defaultFlag.country}`) || null, bet: '', odds: '', description: '' }])
+    setMatches([...matches, { id: nextId, home: '', away: '', competitionEmoji: defaultFlag.emoji, competitionName: '', flagInputValue: `${defaultFlag.emoji} ${defaultFlag.country}`, selectedFlag: flagSelectOptions.find(o => o.value === `${defaultFlag.emoji} ${defaultFlag.country}`) || null, bet: '', odds: '', description: '', confidence: 3 }])
     setNextId(nextId + 1)
   }
 
@@ -194,7 +239,7 @@ export default function Home() {
   const generate = async () => {
     const newTweets = matches.map((m, i) => generateTweet(m, i + 1, matches.length))
     setTweets(newTweets)
-    const newImages = await Promise.all(matches.map(m => generateImage(m, theme)))
+    const newImages = await Promise.all(matches.map(m => generateImage(m, theme, template)))
     setImages(newImages)
   }
 
@@ -331,6 +376,25 @@ export default function Home() {
                   className="w-full mb-4 p-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors resize-none"
                   rows={4}
                 />
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Confianza en la predicción</label>
+                  <div className="flex gap-2 items-center">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => updateMatch(match.id, 'confidence', star.toString())}
+                        className={`text-2xl p-1 rounded hover:bg-gray-100 transition-colors ${star <= match.confidence ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400`}
+                        title={`${star} estrella${star !== 1 ? 's' : ''}`}
+                      >
+                        ⭐
+                      </button>
+                    ))}
+                    <span className="ml-2 text-sm text-gray-600">
+                      {match.confidence > 0 ? `${match.confidence} estrella${match.confidence !== 1 ? 's' : ''}` : 'Sin calificar'}
+                    </span>
+                  </div>
+                </div>
                 <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => duplicateMatch(match.id)}
@@ -359,8 +423,18 @@ export default function Home() {
                 <option value="light">Claro</option>
                 <option value="dark">Oscuro</option>
               </select>
-            </div>
-            <button
+            </div>            <div className="flex flex-col items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">Plantilla de Imagen</label>
+              <select
+                value={template}
+                onChange={e => setTemplate(e.target.value as 'standard' | 'split' | 'minimal')}
+                className="bg-white border-2 border-gray-300 rounded-lg px-4 py-2 focus:border-green-500 focus:outline-none transition-colors"
+              >
+                <option value="standard">Estándar</option>
+                <option value="split">Dividida</option>
+                <option value="minimal">Minimalista</option>
+              </select>
+            </div>            <button
               onClick={generate}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 md:py-4 px-8 md:px-12 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 text-sm md:text-base"
             >
