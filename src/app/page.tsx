@@ -167,7 +167,7 @@ async function generateImage(match: Match, theme: 'light' | 'dark', template: 's
           <span>${toTitleCase(match.competitionName)}</span>
         </div>
         
-        ${match.confidence > 0 && template !== 'minimal' ? `
+        ${match.confidence > 0 && (template === 'standard' || template === 'split') ? `
           <div style="margin-bottom: 30px;">
             <div style="font-size: 20px; margin-bottom: 10px; opacity: 0.9;">Confianza:</div>
             <div style="font-size: 28px;">${'⭐'.repeat(match.confidence)}${'☆'.repeat(5 - match.confidence)}</div>
@@ -182,7 +182,7 @@ async function generateImage(match: Match, theme: 'light' | 'dark', template: 's
           #ADNFutbolero #Predicciones
         </div>
         
-        ${template !== 'minimal' ? `
+        ${(template === 'standard' || template === 'split') ? `
           <div style="font-size: 16px; opacity: 0.7; text-align: center;">
             ¡Sigue @adn_futbolero_ en X para más predicciones! 💬
           </div>
