@@ -99,7 +99,7 @@ function generateTweet(match: Match, index: number, total: number): string {
 ${match.competitionEmoji} ${toTitleCase(match.home)} vs ${toTitleCase(match.away)}
 🏆 ${toTitleCase(match.competitionName)}
 🎯 ${toTitleCase(match.bet)} @ ${match.odds}
-💡 ${toTitleCase(match.description)}
+${match.description !== '' ? `💡 ${toTitleCase(match.description)}` : ''}
 
 ${homeHashtag} ${awayHashtag}`
 }
